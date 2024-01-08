@@ -8,7 +8,7 @@ module.exports = {
       {
         name: 'app.py',
         script: './python-scripts/app.py',
-        interpreter: '/usr/bin/python',
+        interpreter: 'C:/Python311/python.exe', //'/usr/bin/python',
         exec_mode: 'fork',
         error_file: './pm2_mqttError.log'
       }

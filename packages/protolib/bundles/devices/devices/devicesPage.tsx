@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, use } from "react";
 import { BookOpen, Tag, Router } from '@tamagui/lucide-icons';
 import { DevicesModel } from './devicesSchemas';
 import { API, DataTable2, DataView, ButtonSimple, Tinted, AdminPage, PaginatedDataSSR, usePendingEffect } from 'protolib'
@@ -11,6 +11,7 @@ import deviceFunctions from 'protodevice/src/device'
 import subsystem from 'protodevice/src/nodes/utils/subsystem'
 import { Paragraph, TextArea, XStack, YStack } from '@my/ui';
 import { getPendingResult } from "protolib/base";
+import { Slider } from "@my/ui";
 
 const MqttTest = ({ onSetStage, onSetModalFeedback }) => {
   const { message } = useSubscription(['device/compile']);
@@ -89,6 +90,7 @@ export default {
     } else {
       console.log("Errror")
     }
+
     const [showModal, setShowModal] = useState(false)
     const [modalFeedback, setModalFeedback] = useState<any>()
     const [stage, setStage] = useState('')
@@ -105,19 +107,23 @@ export default {
       }
       const deviceDefinition = response.data
       const response1 = await API.get('/adminapi/v1/deviceBoards/' + deviceDefinition.board);
+
       if (response1.isError) {
         alert(response1.error)
         return;
       }
+
       console.log("---------deviceDefinition----------", deviceDefinition)
       deviceDefinition.board = response1.data
       const jsCode = deviceDefinition.config.components;
       const deviceCode = 'device(' + jsCode + ')';
+
       console.log("-------DEVICE CODE------------", deviceCode)
       const deviceObj = eval(deviceCode)
       const componentsTree = deviceObj.getComponentsTree(deviceName, deviceDefinition)
       const yaml = deviceObj.dump("yaml")
       const subsystems = deviceObj.getSubsystemsTree(deviceName, deviceDefinition)
+      
       API.post("/adminapi/v1/devices/" + deviceName, { subsystem: subsystems, deviceDefinition: deviceDefinitionId })
       console.log("ComponentsTree: ", componentsTree)
       console.log("Subsystems: ", subsystems)
@@ -239,21 +245,53 @@ export default {
         icons={DevicesIcons}
         //dataTableGridProps={{ itemMinWidth: 300, spacing: 20 }}
         dataTableGridProps={{
-          itemMinHeight: 320,
-          itemMinWidth: 320,
+          itemMinHeight: "asdfasfd",
+          itemMinWidth: "100%",
           spacing: 20,
           onSelectItem: () => { },
           getBody: (data, width) => {
-            var subsystemData = []
-            data.subsystem.forEach(element => {
-              subsystemData.push(subsystem(element, data.name))
-            });
-            return <YStack px={"$2"} pb="$5" f={1}>
-              <Tinted>
-                <Paragraph mt="20px" ml="20px" fontWeight="700" size="$7">{data.name}</Paragraph>
-                {subsystemData}
-              </Tinted>
+            const [sliderValue, setSliderValue] = useState(50)
+            const { client } = useMqttState()
+            const handleSliderChange = (value) => {
+              const direction = value > sliderValue ? 'right' : 'left';
+              setSliderValue(value);
+              console.log("value: ", value)
+              // You can adjust the sensitivity by changing the threshold value
+              const threshold = 5;
+              if (Math.abs(value - sliderValue) > threshold) {
+                //data.subsystem.actions?.forEach(action => buttonAction(action, direction));
+                let topic = direction === 'left' ? "Motor/move_anticlockwise" : "Motor/move_clockwise"
+                client.publish(topic, value.toString())
+              }              
+            };
+
+            const actionButtons = () => (
+              // <div style={{ display: 'flex', flexDirection: 'row', height: '50%', width: '100%', position: 'relative'}}>
+              <YStack height='100%' width='100%' position="relative">
+              <XStack width="100%" height="fit-content" justifyContent="space-between">
+                <Paragraph textAlign="left" width='fit-content'>Anticlockwise</Paragraph>
+                <Paragraph textAlign="right" width='fit-content'>Clockwise</Paragraph>
+              </XStack>
+              <Slider 
+                defaultValue={[50]} 
+                max={100} 
+                step={1} 
+                width="100%"
+                onValueChange={(value) => handleSliderChange(value)}
+              >
+                <Slider.Track>
+                  <Slider.TrackActive />
+                </Slider.Track>
+                <Slider.Thumb index={0} circular elevate />
+              </Slider>
             </YStack>
+
+            );
+
+            return <YStack height="100%" width="100%" alignItems='flex-start' justifyContent="space-between" padding='5%' position="relative">
+              {actionButtons()}
+            </YStack>
+
           }
         }}
       />
