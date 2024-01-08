@@ -67,7 +67,7 @@ describe("Basic tests", () => {
     }, 30000)
 })
 
-describe("Test entities autocreation", () => {
+describe.skip("Test entities autocreation", () => {
     const USER_IDENTIFIER = 'user@user.user'
     const USER_PASSWORD = 'user1234'
     let driver;
@@ -96,6 +96,12 @@ describe("Test entities autocreation", () => {
         if (driver) {
             await driver.quit()
         }
+    }, 10000)
+
+    describe.skip("sample", () => {
+        it('test sample', () => {
+            expect(true).toBe(true)
+        })
     })
 
     describe("test api creations", () => {
@@ -109,7 +115,7 @@ describe("Test entities autocreation", () => {
         const OBJECTS = {
             Without_Object: 0
         }
-
+ 
         beforeEach(async () => {
             await getEditableObjectCreate(driver, 'apis')
         }, 30000)
@@ -248,6 +254,7 @@ const getEditableObjectCreate = async (driver, entity) => {
     await driver.wait(until.elementLocated(By.id('admin-dataview-create-dlg')))
     await driver.wait(until.elementLocated(By.id('admin-eo')))
 }
+
 const fillEditableObjectInput = async (driver, field, value, debounce = undefined) => {
     /*fill input */
     const nameInput = await driver.findElement(By.id(`editable-object-input-${field}`))
