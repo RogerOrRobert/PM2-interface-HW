@@ -250,19 +250,13 @@ export default {
           spacing: 20,
           onSelectItem: () => { },
           getBody: (data, width) => {
-            const [sliderValue, setSliderValue] = useState(50)
+            const [sliderValue, setSliderValue] = useState<any>(50)
+            const SLIDER_CENTER = 50
             const { client } = useMqttState()
-            const handleSliderChange = (value) => {
-              const direction = value > sliderValue ? 'right' : 'left';
-              setSliderValue(value);
-              console.log("value: ", value)
-              // You can adjust the sensitivity by changing the threshold value
-              const threshold = 5;
-              if (Math.abs(value - sliderValue) > threshold) {
-                //data.subsystem.actions?.forEach(action => buttonAction(action, direction));
-                let topic = direction === 'left' ? "Motor/move_anticlockwise" : "Motor/move_clockwise"
-                client.publish(topic, value.toString())
-              }              
+
+            const handleSliderChange = () => {
+              let topic = sliderValue < SLIDER_CENTER ? "Motor/move_anticlockwise" : "Motor/move_clockwise"
+              client.publish(topic, sliderValue.toString())
             };
 
             const actionButtons = () => (
@@ -277,7 +271,8 @@ export default {
                 max={100} 
                 step={1} 
                 width="100%"
-                onValueChange={(value) => handleSliderChange(value)}
+                onValueChange={(value) => {setSliderValue(value)} }
+                onPressOut={() => handleSliderChange()}
               >
                 <Slider.Track>
                   <Slider.TrackActive />
