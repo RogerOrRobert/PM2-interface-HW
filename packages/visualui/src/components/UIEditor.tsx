@@ -1,4 +1,5 @@
 import { memo, useEffect, useState, useRef } from "react";
+import { useRouter } from 'next/router'
 import { Editor } from "@craftjs/core";
 import { Layers } from "@craftjs/layers";
 import { useEditorStore } from '../store/EditorStore';
@@ -14,14 +15,15 @@ import { getMissingJsxImports, getSource } from "../utils/utils";
 import theme from './Theme'
 import { withTopics } from "react-topics";
 import { ToggleGroup, Button, XStack } from "@my/ui"
-import UIMasks from '../masks/UI.mask.json';
 import { SidebarItem } from "./Sidebar/SideBarItem";
+import { getFlowMasks, getFlowsCustomComponents } from "app/bundles/masks";
+import { FlowConstructor } from "protoflow";
 
 export const UIFLOWID = "flows-ui"
+const Flow = FlowConstructor(UIFLOWID)
 /* 
-const Flow = FlowFactory(UIFLOWID) */
 // const uiStore = useFlowsStore()
-
+*/
 function UIEditor({ isActive = true, sourceCode = "", sendMessage, currentPage = "", userPalettes = {}, resolveComponentsDir = "", topics, metadata = {} }) {
     const editorRef = useRef<any>()
     const [codeEditorVisible, setCodeEditorVisible] = useState(false)
@@ -33,6 +35,7 @@ function UIEditor({ isActive = true, sourceCode = "", sendMessage, currentPage =
     const [isSideBarVisible, setIsSideBarVisible] = useState(false)
     const [customizeVisible, setCustomizeVisible] = useState(true);
     const [layerVisible, setLayerVisible] = useState(false);
+    const router = useRouter(); 
 
     const { data } = topics;
 
@@ -163,17 +166,17 @@ function UIEditor({ isActive = true, sourceCode = "", sendMessage, currentPage =
                         visible={customizeVisible}
                         onChange={(val) => setCustomizeVisible(val)}
                     >
-                        <Flows
+                        <Flow
                             disableDots={!isActive || preview}
                             sourceCode={currentPageContent}
                             setSourceCode={setCurrentPageContent}
-                            customComponents={[]}
+                            customComponents={getFlowsCustomComponents(router.pathname, router.query)}
                             onSave={(code, _, data) => onEditorSave('flows', code, data)}
                             enableCommunicationInterface={true}
                             // store={uiStore}
-                            config={{ masks: UIMasks }}
+                            config={{ masks: getFlowMasks(router.pathname, router.query) }}
                             zoomOnDoubleClick={!preview}
-                            uiFlowId={UIFLOWID}
+                            flowId={UIFLOWID}
                             themeMode={'dark'}
                             bgColor={'#252526'}
                             theme={theme}

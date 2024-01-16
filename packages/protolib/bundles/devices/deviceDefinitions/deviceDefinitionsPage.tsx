@@ -11,6 +11,8 @@ import { useThemeSetting } from '@tamagui/next-theme'
 import { getPendingResult } from "protolib/base";
 import { usePendingEffect } from "protolib";
 import { Flows } from "protolib";
+import { getFlowMasks, getFlowsCustomComponents } from "app/bundles/masks";
+import { useRouter } from 'next/router'
 
 const DeviceDefitionIcons = {
   name: Tag,
@@ -30,6 +32,7 @@ export default {
     const [sourceCode, setSourceCode] = useState(defaultJsCode.components)
     // const [isModified,setIsModified] = React.useState(false)
     const [editedObjectData, setEditedObjectData] = React.useState({})
+    const router = useRouter()
 
     const saveToFile = (code, path) => {
       editedObjectData.setData({ components: code, sdkConfig: { board: "esp32dev", framework: { type: "arduino" } } })
@@ -44,9 +47,9 @@ export default {
     const cores = coresList.isLoaded ? coresList.data.items.map(i => DeviceCoreModel.load(i).getData()) : []
 
     return (<AdminPage title="Device Definitions" workspace={workspace} pageSession={pageSession}>
-      <AlertDialog open={showDialog} setOpen={(open) => { setShowDialog(open) }} hideAccept={true} style={{ width: "80%", height: "80%" }}>
+      <AlertDialog open={showDialog} setOpen={(open) => { setShowDialog(open) }} hideAccept={true} style={{ width: "80%", height: "80%", padding: '0px', overflow: 'hidden' }}>
         {/* <Center style={{minWidth: "80%" }}> */}
-        <XStack mt={10} f={1} minWidth={"100%"}>
+        <XStack f={1} minWidth={"100%"}>
           <Flows
             style={{ width: "100%" }}
             disableDots={true}
@@ -62,7 +65,7 @@ export default {
             }}
             showActionsBar={isSaveActive}
             mode={"device"}
-            customComponents={"device"}
+            customComponents={router.pathname && typeof window !== undefined ? getFlowsCustomComponents(router.pathname, router.query) : []}
             bridgeNode={false}
             setSourceCode={(sourceCode) => {
               console.log('set new sourcecode from flows: ', sourceCode)
@@ -71,7 +74,7 @@ export default {
             sourceCode={sourceCode}
             themeMode={resolvedTheme}
             key={'flow'}
-            config={{ masks: [], layers: [] }}
+            config={{ masks: getFlowMasks(router.pathname, router.query), layers: [] }}
             bgColor={'transparent'}
             dataNotify={(data: any) => {
               if (data.notifyId) {

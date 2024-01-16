@@ -1,12 +1,16 @@
-// import OutputPin from "./OutputPin";
-import Wifi from './Wifi'
-import Mqtt from './Mqtt'
-import DeepSleep from './DeepSleep'
-import Device from "./Device";
-import BinarySensor from "./BinarySensor";
-import NeopixelsBus from "./NeopixelsBus";
-import Relay from "./Relay";
-import ADCSensor from "./ADCSensor";
+import dynamic from 'next/dynamic'
+
+const Wifi = dynamic(() => import('./Wifi'))
+const Device = dynamic(() => import('./Device'))
+const Mqtt = dynamic(() => import('./Mqtt'))
+const DeepSleep = dynamic(() => import('./DeepSleep'))
+const BinarySensor = dynamic(() => import('./BinarySensor'))
+const NeopixelsBus = dynamic(() => import('./NeopixelsBus'))
+const Relay = dynamic(() => import('./Relay'))
+const ADCSensor = dynamic(() => import('./ADCSensor'))
+const Dfplayer = dynamic(() => import('./Dfplayer'))
+const ModbusLoadCell = dynamic(() => import('./ModbusLoadCell'))
+
 // import PulseCounter from "./PulseCounter";
 // import LEDCOutput from "./LEDCOutput";
 // import PIRSensor from "./PIRSensor"
@@ -15,13 +19,11 @@ import ADCSensor from "./ADCSensor";
 // import NFCReader from "./NFCReader";
 // import UltrasonicDistanceSensor from "./UltrasonicDistanceSensor";
 // import ISOutput from "./ISOutput";
-import Dfplayer from "./Dfplayer";
 // import XiaomiMiFlora from "./XiaomiMiFlora";
 // import ClimateIR from "./ClimateIR";
 // import Servo from "./Servo";
 // import Mpr121 from "./Mpr121";
 // import TempHumidity from "./TempHumidity";
-import ModbusLoadCell from "./ModbusLoadCell";
 // import BH1750 from "./BH1750";
 // import HM3301 from "./HM3301";
 // import SEN0377 from "./SEN0377";
@@ -30,12 +32,13 @@ import ModbusLoadCell from "./ModbusLoadCell";
 // import SEN55 from "./SEN55";
 // import MHZ19 from "./MHZ19";
 
+
 const deviceMasks = [
   {
     id: 'esp32dev',
     type: 'ArrayLiteralExpression',
     check: (node, nodeData) => node.type == "ArrayLiteralExpression" && nodeData['element-1'] == '"esp32dev"',
-    getComponent: Device,
+    getComponent: (node, nodeData, children) => <Device node={node} nodeData={nodeData} children={children} />,
     getInitialData: () => { return { to: '"esp32dev"' } },
     hidden: true,
     nonDeletable: true
@@ -44,14 +47,14 @@ const deviceMasks = [
     id: 'Wifi',
     type: 'CallExpression',
     check: (node, nodeData) => node.type == "CallExpression" && nodeData.to?.startsWith('wifi'), //TODO: Change output function name
-    getComponent: Wifi,
+    getComponent: (node, nodeData, children) => <Wifi node={node} nodeData={nodeData} children={children} />,
     getInitialData: () => { return { to: 'wifi', param1: '"SSID"', param2: '"PASSWORD"', param3: '"none"' } }
   },
   {
     id: 'Mqtt',
     type: 'CallExpression',
     check: (node, nodeData) => node.type == "CallExpression" && nodeData.to?.startsWith('mqtt'), //TODO: Change output function name
-    getComponent: Mqtt,
+    getComponent: (node, nodeData, children) => <Mqtt node={node} nodeData={nodeData} children={children}/>,
     getInitialData: () => { return { to: 'mqtt', param1: '"BROKERADDRESS"', param2: '""' } }
   },
   // {
@@ -65,7 +68,7 @@ const deviceMasks = [
     id: 'Relay',
     type: 'CallExpression',
     check: (node, nodeData) => node.type == "CallExpression" && nodeData.to?.startsWith('relay'), //TODO: Change output function name
-    getComponent: Relay,
+    getComponent: (node, nodeData, children) => <Relay node={node} nodeData={nodeData} children={children} />,
     getInitialData: () => { return { to: 'relay', param1: '""',param2: '"ALWAYS_OFF"' } }
   },
 
@@ -84,21 +87,21 @@ const deviceMasks = [
     id: 'BinarySensor',
     type: 'CallExpression',
     check: (node, nodeData) => node.type == "CallExpression" && nodeData.to?.startsWith('binarySensor'), //TODO: Change output function name
-    getComponent: BinarySensor,
+    getComponent: (node, nodeData, children) => <BinarySensor node={node} nodeData={nodeData} children={children} />,
     getInitialData: () => { return { to: 'binarySensor', param1: '""' } }
   },
   {
     id: 'NeopixelsBus',
     type: 'CallExpression',
     check: (node, nodeData) => node.type == "CallExpression" && nodeData.to?.startsWith('neopixelsBus'), //TODO: Change output function name
-    getComponent: NeopixelsBus,
+    getComponent: (node, nodeData, children) => <NeopixelsBus node={node} nodeData={nodeData} children={children} />,
     getInitialData: () => { return { to: 'neopixelsBus', param1: '""', param2: '16', param3: '"GRB"', param4: '"WS2811"', param5: '"ALWAYS_ON"', param6: '"1s"', param7: '0', param8: false, param9: false, param10: false, param11: false, param12: false, param13: false, param14: false, param15: false, param16: false, param17: false, param18: false } }
   },
   {
     id: 'ADCSensor',
     type: 'CallExpression',
     check: (node, nodeData) => node.type == "CallExpression" && nodeData.to?.startsWith('adcSensor'),
-    getComponent: ADCSensor,
+    getComponent: (node, nodeData, children) => <ADCSensor node={node} nodeData={nodeData} children={children} />,
     getInitialData: () => { return { to: 'adcSensor', param1: '"analogic"', param2: '"30s"', param3: '"auto"' } }
   },
   // {
@@ -256,10 +259,10 @@ const deviceMasks = [
   //   getInitialData: () => { return { to: 'mhz19', param1: '""', param2: '', param3: '"30s"'} }
   // }
 ]
-
+  
 export default deviceMasks.map((e) => {
   return {
-      ...e,
-      capabilities: ["esphome"]
+    ...e,
+    capabilities: ["esphome"]
   };
 });

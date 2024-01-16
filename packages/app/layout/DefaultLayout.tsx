@@ -13,16 +13,19 @@ export const DefaultLayout = React.forwardRef((props: {
   children: React.ReactNode;
   footer?: React.ReactNode;
   header?: React.ReactNode;
+  headerTitle?: string;
   seoProps?: any;
   title?: string;
   description?: string;
   openGraph?: any;
+  tintSwitcher?: boolean;
+  themeSwitcher?: boolean;
 } & StackProps, ref: any) => <ProtoDefaultLayout
     ref={ref}
     sideMenu={null}
     footer={<Footer />}
     header={<AppBar>
-      <HeaderContents menu={<HeaderMenu menuPlacement={'bottom'}>
+      <HeaderContents tintSwitcher={props.tintSwitcher} themeSwitcher={props.themeSwitcher} headerTitle={props.headerTitle} menu={<HeaderMenu menuPlacement={'bottom'}>
         <HeaderMenuContent />
       </HeaderMenu>} />
     </AppBar>}

@@ -1,12 +1,36 @@
 import devicesMasks from 'protodevice/src/nodes'
-// import getDevicesCapabilities from 'protodevice/src/getCapabilities'
+import visualuiTemplateMasks from 'visualui/src/masks/UI.mask.json';
 
-// export const getCapabilities = (args:any)=>{
+const paths = {
+    devices: [
+        'devices', 
+        'deviceDefinitions',
+        'deviceBoards',
+        'deviceCores',
+        'deviceSdks'
+    ], 
+    visualui: [
+        'visualui',
+    ]
+}
 
-// }
+export const getFlowsCustomComponents = (path: string, queryParams: {}) => {
+    const pathParts = path.split('/')
+    const segment = pathParts[pathParts.length - 1]
+    const query = JSON.stringify(queryParams)
 
-const masks = [
-    ...devicesMasks
-];
+    if (paths.devices.includes(segment)) return devicesMasks
+    if (paths.visualui.includes(segment) || (query && paths.visualui.find(p => query.includes(p)))) return []
 
-export default masks;
+    return [] 
+}
+
+export const getFlowMasks = (path: string, queryParams: {}) => {
+    const pathParts = path.split('/')
+    const segment = pathParts[pathParts.length - 1]
+    const query = JSON.stringify(queryParams)
+
+    if (paths.visualui.includes(segment) || (query && paths.visualui.find(p => query.includes(p)))) return visualuiTemplateMasks
+
+    return []
+}

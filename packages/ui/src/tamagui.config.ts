@@ -9,8 +9,8 @@ import { createMunroFont } from '@tamagui/font-munro'
 import { createSilkscreenFont } from '@tamagui/font-silkscreen'
 import { createGenericFont } from './createGenericFont'
 import { animations } from './animations'
-import {themes} from './themes'
-import {tokens} from './tokens'
+import { themes } from './themes'
+import { tokens } from './tokens'
 
 export const cherryBombFont = createCherryBombFont()
 export const munroFont = createMunroFont()
@@ -172,8 +172,7 @@ const monoFont = createGenericFont(
     sizeLineHeight: (x) => x * 1.5,
   }
 )
-
-export const config = createTamagui({
+const defaultDataConfig = {
   defaultFont: 'body',
   animations,
   shouldAddPrefersColorThemes: true,
@@ -207,4 +206,42 @@ export const config = createTamagui({
     hoverNone: { hover: 'none' },
     pointerCoarse: { pointer: 'coarse' },
   }),
+}
+
+function spreadRecursive(config, extraConfig) {
+  const tmpConfig = { ...config };
+  for (const key in extraConfig) {
+    if (extraConfig.hasOwnProperty(key)) {
+      if (
+        typeof extraConfig[key] === 'object' &&
+        config.hasOwnProperty(key) &&
+        typeof config[key] === 'object'
+      ) {
+        tmpConfig[key] = spreadRecursive(config[key], extraConfig[key]);
+      } else {
+        tmpConfig[key] = extraConfig[key];
+      }
+    }
+  }
+  return tmpConfig;
+}
+
+export const createConfig = (aditionalConfig: any = {}) => {
+  var newConfig = defaultDataConfig
+  if (Object.keys.length > 0) {
+    newConfig = spreadRecursive(defaultDataConfig, aditionalConfig)
+  }
+  return createTamagui(newConfig)
+}
+
+export const config = createConfig({
+  // example
+  // settings: {
+  //   defaultTint: 'orange'
+  // },
+  // themes: {
+  //   dark_green: {
+  //     // color:'#00FF00'
+  //   }
+  // }
 })
