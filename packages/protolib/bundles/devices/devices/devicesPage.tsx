@@ -251,33 +251,35 @@ export default {
           onSelectItem: () => { },
           getBody: (data, width) => {
             const [sliderValue, setSliderValue] = useState<any>(50)
+            //const [prevSliderValue, setPrevSliderValue] = useState<any>(50);
             const SLIDER_CENTER = 50
             const { client } = useMqttState()
 
-            const handleSliderChange = () => {
-              let topic = sliderValue < SLIDER_CENTER ? "Motor/move_anticlockwise" : "Motor/move_clockwise"
+            const handleSliderChange = () => {   
+              const topic = 'motor'          
+              // const topic = sliderValue < prevSliderValue ? "Motor/move_clockwise" : "Motor/move_anticlockwise"
+              // console.log("previous value: ", prevSliderValue, " vs actual value: ", sliderValue)
               client.publish(topic, sliderValue.toString())
+              //setPrevSliderValue(sliderValue)
             };
 
             const actionButtons = () => (
-              // <div style={{ display: 'flex', flexDirection: 'row', height: '50%', width: '100%', position: 'relative'}}>
               <YStack height='100%' width='100%' position="relative">
               <XStack width="100%" height="fit-content" justifyContent="space-between">
-                <Paragraph textAlign="left" width='fit-content'>Anticlockwise</Paragraph>
-                <Paragraph textAlign="right" width='fit-content'>Clockwise</Paragraph>
+                <Paragraph textAlign="left" width='fit-content' fontSize={20} marginBottom={25}>0°</Paragraph>
+                <Paragraph textAlign="right" width='fit-content' fontSize={20} marginBottom={25}>180°</Paragraph>
               </XStack>
               <Slider 
-                defaultValue={[50]} 
-                max={100} 
-                step={1} 
+                defaultValue={[0]} 
+                max={180} 
+                step={10} 
                 width="100%"
                 onValueChange={(value) => {setSliderValue(value)} }
-                onPressOut={() => handleSliderChange()}
               >
                 <Slider.Track>
                   <Slider.TrackActive />
                 </Slider.Track>
-                <Slider.Thumb index={0} circular elevate />
+                <Slider.Thumb onPressOut={() => handleSliderChange()} index={0} circular elevate />
               </Slider>
             </YStack>
 
